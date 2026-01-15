@@ -29,9 +29,9 @@ public final class DetailImageCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func configure(model: DetailPresentation) {
+    public func configure(model: DetailPresentation, downloader: ImageDownloader) {
         Task { [weak self] in
-            let image = try? await ImageDownloader.shared.downloadImage(
+            let image = try? await downloader.downloadImage(
                 from: TransformQueryBuilder(url: model.url)
                     .buildTransformURL(
                         options: model.options

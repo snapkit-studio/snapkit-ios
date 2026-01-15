@@ -52,6 +52,8 @@ public final class DetailViewController: UIViewController, @MainActor View {
         return label
     }()
     
+    private let imageDownloader = ImageDownloader()
+    
     public init(reactor: Reactor) {
         defer { self.reactor = reactor }
         super.init(nibName: nil, bundle: nil)
@@ -74,7 +76,7 @@ public final class DetailViewController: UIViewController, @MainActor View {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        ImageDownloader.shared.clearData()
+        imageDownloader.clearData()
     }
     
     public func bind(reactor: Reactor) {
@@ -102,7 +104,7 @@ public final class DetailViewController: UIViewController, @MainActor View {
                 self?.paginationLabel.text = $0
             }.disposed(by: disposeBag)
         
-        ImageDownloader.shared.displayInfo
+        imageDownloader.displayInfo
             .subscribe(on: MainScheduler.asyncInstance)
             .subscribe { [weak self] in
                 self?.displayView.configure(memory: $0.memory, time: $0.time, count: $0.count)
@@ -158,8 +160,8 @@ public final class DetailViewController: UIViewController, @MainActor View {
     }
     
     private func setDataSource() {
-        let imageCell = UICollectionView.CellRegistration<DetailImageCell, DetailPresentation>{ cell, _, item in
-            cell.configure(model: item)
+        let imageCell = UICollectionView.CellRegistration<DetailImageCell, DetailPresentation>{ [weak imageDownloader] cell, _, item in
+            cell.configure(model: item, downloader: imageDownloader!)
         }
         
         let infoCell = UICollectionView.CellRegistration<DetailInfoCell, Detail>{ cell, _, item in

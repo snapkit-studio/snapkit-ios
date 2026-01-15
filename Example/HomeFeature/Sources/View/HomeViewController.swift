@@ -26,6 +26,8 @@ public class HomeViewController: UIViewController, @MainActor View {
     
     private let displayView = DisplayInfoView()
     
+    private let imageDownloader = ImageDownloader()
+    
     private lazy var collectionView: UICollectionView = {
         let view = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
         view.refreshControl = refreshControl
@@ -59,7 +61,6 @@ public class HomeViewController: UIViewController, @MainActor View {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: false)
         extendedLayoutIncludesOpaqueBars = true
-        ImageDownloader.shared.clearData()
     }
     
     public func bind(reactor: Reactor) {
@@ -71,6 +72,7 @@ public class HomeViewController: UIViewController, @MainActor View {
                 if self?.refreshControl.isRefreshing == true {
                     self?.refreshControl.endRefreshing()
                 }
+                self?.imageDownloader.clearData()
                 self?.apply(sections: sections)
             }.disposed(by: disposeBag)
         
@@ -113,7 +115,7 @@ public class HomeViewController: UIViewController, @MainActor View {
             make.centerX.equalToSuperview()
         }
         
-        ImageDownloader.shared.displayInfo
+        imageDownloader.displayInfo
             .subscribe(on: MainScheduler.asyncInstance)
             .subscribe { [weak self] in
                 self?.displayView.configure(memory: $0.memory, time: $0.time, count: $0.count)
@@ -318,8 +320,8 @@ public class HomeViewController: UIViewController, @MainActor View {
             cell.configure(banner: item)
         }
         
-        let homeCategoryCell = UICollectionView.CellRegistration<HomeCategoryCell, [HomeCategoryPresentation]> { (cell, _, item) in
-            cell.configure(model: item)
+        let homeCategoryCell = UICollectionView.CellRegistration<HomeCategoryCell, [HomeCategoryPresentation]> { [weak imageDownloader] (cell, _, item) in
+            cell.configure(model: item, downloader: imageDownloader!)
         }
         
         let dividerCell = UICollectionView.CellRegistration<DividerCell, Void> { _, _, _  in }
@@ -328,8 +330,8 @@ public class HomeViewController: UIViewController, @MainActor View {
             cell.configure(title: item)
         }
         
-        let curationCell = UICollectionView.CellRegistration<CurationCell, CurationInfoPresentation> { cell, _, item in
-            cell.configure(model: item)
+        let curationCell = UICollectionView.CellRegistration<CurationCell, CurationInfoPresentation> { [weak imageDownloader] cell, _, item in
+            cell.configure(model: item, downloader: imageDownloader!)
             cell.rx
                 .tapGesture()
                 .filter { $0.state == .recognized }
@@ -345,8 +347,8 @@ public class HomeViewController: UIViewController, @MainActor View {
             headerView.reactor = self?.reactor
         }
         
-        let placeCell = UICollectionView.CellRegistration<PlaceCell, PlacePresentation> { cell, _, item in
-            cell.configure(model: item)
+        let placeCell = UICollectionView.CellRegistration<PlaceCell, PlacePresentation> { [weak imageDownloader] cell, _, item in
+            cell.configure(model: item, downloader: imageDownloader!)
             cell.rx
                 .tapGesture()
                 .filter { $0.state == .recognized }

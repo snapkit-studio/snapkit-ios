@@ -112,11 +112,11 @@ public final class PlaceCell: UICollectionViewCell {
         return layoutAttributes
     }
     
-    public func configure(model: PlacePresentation) {
+    public func configure(model: PlacePresentation, downloader: ImageDownloader) {
         titleLabel.text = model.place.dDayTitle
         titleLabel.setHighlight(with: model.place.dDay, using: Colors.dDayTextColor)
         Task { [weak self] in
-            let image = try? await ImageDownloader.shared.downloadImage(
+            let image = try? await downloader.downloadImage(
                 from: TransformQueryBuilder(url: model.place.imageURL)
                     .buildTransformURL(
                         options: model.options

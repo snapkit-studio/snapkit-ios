@@ -35,9 +35,9 @@ public final class CategoryView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func configure(model: HomeCategoryPresentation) {
+    public func configure(model: HomeCategoryPresentation, downloader: ImageDownloader) {
         Task { [weak self] in
-            let image = try? await ImageDownloader.shared.downloadImage(
+            let image = try? await downloader.downloadImage(
                 from: TransformQueryBuilder(url: model.homeCategory.imageURL)
                     .buildTransformURL(
                         options: model.options

@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import CoreDomain
 import HomeDomain
 
 public final class HomeCategoryCell: UICollectionViewCell {
@@ -27,10 +28,10 @@ public final class HomeCategoryCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func configure(model: [HomeCategoryPresentation]) {
+    public func configure(model: [HomeCategoryPresentation], downloader: ImageDownloader) {
         model.forEach { category in
             let categoryView = CategoryView()
-            categoryView.configure(model: category)
+            categoryView.configure(model: category, downloader: downloader)
             containerView.addArrangedSubview(categoryView)
         }
     }

@@ -51,9 +51,9 @@ public final class CurationCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func configure(model: CurationInfoPresentation) {
+    public func configure(model: CurationInfoPresentation, downloader: ImageDownloader) {
         Task { [weak self] in
-            let image = try? await ImageDownloader.shared.downloadImage(
+            let image = try? await downloader.downloadImage(
                 from: TransformQueryBuilder(url: model.info.imageURL)
                     .buildTransformURL(
                         options: model.options
